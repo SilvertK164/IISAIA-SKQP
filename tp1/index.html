@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PagoYa — Servicios</title>
+<style>
+:root{
+  --bg:#FBFBF9; --surface:#FFFFFF; --text:#1C293C; --muted:#6B7280;
+  --primary:#FDC800; --secondary:#432DD7; --danger:#DC2626; --success:#16A34A; --border:#1C293C;
+  --border-w:3px; --radius:8px; --shadow-offset:6px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px;
+  --fs-1:13px; --fs-2:15px; --fs-3:17px; --fs-4:21px; --fs-5:27px; --fs-6:35px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,0,0,1); --dur:200ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs-2);line-height:1.45;-webkit-font-smoothing:antialiased}
+[hidden]{display:none !important}
+main{max-width:560px;margin:0 auto;padding:var(--s5) var(--s4) var(--s6)}
+
+h1{font-size:var(--fs-5);margin:0;line-height:1.1}
+h2{font-size:var(--fs-4);margin:0 0 var(--s2);line-height:1.2}
+p{margin:0 0 var(--s3)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted);font-size:var(--fs-1)}
+.grande{font-size:var(--fs-6);font-weight:700;letter-spacing:-.02em}
+
+.tarjeta{background:var(--surface);border:var(--border-w) solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--border);padding:var(--s5);margin-bottom:var(--s5)}
+.cabecera{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s3);margin-bottom:var(--s5)}
+.cabecera .muted{text-align:right}
+.barra{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);
+  border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--primary);
+  padding:var(--s2) var(--s3);margin-bottom:var(--s5);font-size:var(--fs-1)}
+.barra b{font-size:var(--fs-3)}
+.aviso{border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--surface);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s5);font-size:var(--fs-2);font-weight:700;
+  box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--secondary);
+  transition:background var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+.aviso.error{background:var(--danger);color:#fff;box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--border)}
+.aviso.exito{background:var(--success);color:#fff;box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--border)}
+.codigo{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;
+  border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--primary);
+  padding:var(--s3) var(--s4);margin-bottom:var(--s4);box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--border)}
+.codigo b{font-size:var(--fs-6);letter-spacing:.15em;line-height:1}
+.codigo small{display:block;font-size:var(--fs-1);max-width:260px}
+.fila{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s4)}
+.etiqueta{border:var(--border-w) solid var(--border);border-radius:var(--radius);padding:var(--s1) var(--s2);font-size:var(--fs-3);font-weight:700;background:var(--primary)}
+
+.btn{font:inherit;font-weight:700;font-size:var(--fs-2);color:var(--text);background:var(--surface);
+  border:var(--border-w) solid var(--border);border-radius:var(--radius);padding:var(--s3) var(--s4);cursor:pointer;
+  box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--border);
+  transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),background var(--dur) var(--ease);
+  touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--border)}
+.btn:focus-visible{outline:var(--border-w) solid var(--secondary);outline-offset:2px}
+.btn:disabled{cursor:not-allowed;color:var(--muted);background:var(--bg);transform:none;box-shadow:3px 3px 0 var(--muted);border-color:var(--muted)}
+.btn-primario{background:var(--primary)}
+.btn-secundario{background:var(--secondary);color:#fff}
+.btn-bloque{display:block;width:100%;padding:var(--s5);font-size:var(--fs-4);margin-top:var(--s4)}
+
+canvas{display:block;width:100%;height:auto;touch-action:none}
+
+/* recibo */
+.raspar{position:relative;border:var(--border-w) solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.raspar-monto{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s1)}
+#raspar{position:relative;z-index:1;cursor:crosshair;transition:opacity var(--dur) var(--ease)}
+#raspar.revelado{opacity:0;pointer-events:none}
+
+/* ruleta */
+.ruleta-caja{max-width:340px;margin:var(--s4) auto 0}
+
+/* minijuegos */
+.juego-cab{display:flex;justify-content:space-between;gap:var(--s3);flex-wrap:wrap;margin-bottom:var(--s3);font-size:var(--fs-1);color:var(--muted)}
+.juego-cab b{color:var(--text);font-size:var(--fs-3)}
+.ayuda{color:var(--muted);font-size:var(--fs-1);margin:var(--s3) 0 0}
+.cinta-canvas{border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer}
+.teclado{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);margin-top:var(--s2)}
+.tecla{padding:var(--s4) 0;font-size:var(--fs-4)}
+.contador{font-size:var(--fs-6);font-weight:700;text-align:center;padding:var(--s3) 0;letter-spacing:-.02em}
+.barra-prog{position:relative;height:28px;border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+.barra-fill{position:absolute;inset:0;width:0;background:var(--secondary)}
+.barra-marca{position:absolute;top:0;bottom:0;width:var(--border-w);background:var(--danger)}
+
+/* desglose recibo */
+.desglose td{padding:var(--s1) var(--s1);border-bottom:var(--border-w) solid var(--border)}
+.desglose td.cargo{color:var(--danger)}
+.desglose tfoot td{font-weight:700;border-bottom:0;font-size:var(--fs-3);padding-top:var(--s2)}
+
+/* resumen y calificación */
+.resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3);margin-top:var(--s4)}
+.resumen>div{border:var(--border-w) solid var(--border);border-radius:var(--radius);padding:var(--s2) var(--s3);background:var(--bg);display:flex;flex-direction:column;gap:var(--s1)}
+.resumen b{font-size:var(--fs-3)}
+.calificacion{margin-top:var(--s4)}
+.estrellas{display:flex;gap:var(--s2)}
+.estrellas .btn{flex:1;padding:var(--s2) 0;font-size:var(--fs-4)}
+.estrellas .btn.elegida{background:var(--primary)}
+@media (max-width:400px){.resumen{grid-template-columns:1fr}}
+
+/* términos / identidad / encuesta */
+.terminos{margin-top:var(--s4);border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--bg);
+  height:120px;overflow-y:auto;padding:var(--s3);font-size:var(--fs-1);color:var(--muted)}
+.terminos p{margin:0 0 var(--s2)}
+.check{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s3);font-weight:700}
+.check input{width:20px;height:20px;accent-color:var(--secondary)}
+.identidad{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s4);flex-wrap:wrap}
+.campo{font:inherit;font-family:var(--mono);font-size:var(--fs-4);width:120px;padding:var(--s2) var(--s3);
+  border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);letter-spacing:.2em}
+.campo:focus-visible{outline:var(--border-w) solid var(--secondary);outline-offset:2px}
+textarea.campo{width:100%;letter-spacing:0;font-size:var(--fs-2);resize:none;height:64px}
+.rango{width:100%;margin:var(--s3) 0;accent-color:var(--secondary);height:32px}
+.scroller{height:140px;overflow-y:scroll;border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--bg);margin-top:var(--s2)}
+.scroller>div{height:24000px;background:repeating-linear-gradient(to bottom,transparent 0 39px,var(--muted) 39px 40px)}
+.plinko{border:var(--border-w) solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:crosshair}
+.ok{color:var(--secondary);font-weight:700}
+.espera{text-align:center;padding:var(--s6) var(--s4);color:var(--muted)}
+
+/* modo de descanso visual (se activa solo, por su bien) */
+body.oscuro{--bg:#12151C;--surface:#1C2230;--text:#F3F4F6;--muted:#9CA3AF;--border:#F3F4F6}
+body.oscuro .desglose td.cargo,body.oscuro td.perdido{color:#F87171}
+
+/* fin */
+table{width:100%;border-collapse:collapse;font-size:var(--fs-1);margin-top:var(--s3)}
+th{text-align:left;padding:var(--s2) var(--s1);border-bottom:var(--border-w) solid var(--border);font-size:var(--fs-1)}
+td{padding:var(--s2) var(--s1);border-bottom:var(--border-w) solid var(--border)}
+td.num,th.num{text-align:right}
+td.perdido{color:var(--danger)}
+tfoot td{font-weight:700;border-bottom:0;font-size:var(--fs-3)}
+
+@media (max-width:400px){
+  main{padding:var(--s4) var(--s3) var(--s5)}
+  .tarjeta{padding:var(--s4)}
+  .grande,.contador{font-size:var(--fs-5)}
+  .teclado{gap:var(--s2)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="cabecera">
+    <h1>PagoYa</h1>
+    <p class="muted">Pago de servicios<br>Su comodidad es nuestra prioridad.</p>
+  </div>
+
+  <div class="barra" id="barraSaldo" hidden>
+    <span>Saldo pendiente <b class="mono" id="saldoPendiente"></b></span>
+    <span>Intentos <b class="mono" id="cantGiros">0</b></span>
+  </div>
+
+  <div class="aviso" id="mensaje" hidden></div>
+
+  <!-- FASE: recibo -->
+  <section class="tarjeta" data-fase="recibo">
+    <p class="muted">Recibo <span class="mono" id="nroRecibo">0048-2211</span> — Luz y agua — Vence hoy</p>
+    <h2>Monto a pagar</h2>
+    <div class="codigo">
+      <b class="mono" id="codigoRecibo">2211</b>
+      <small id="codigoTexto">Recuerde este número. Se le pedirá para confirmar su identidad en cada intento de pago.</small>
+      <button class="btn" id="btnMostrarCodigo" hidden>Mostrar de nuevo (+ $ 0.30)</button>
+    </div>
+    <p class="muted">El importe se encuentra protegido. Raspe la zona gris para conocerlo.</p>
+    <div class="raspar">
+      <div class="raspar-monto">
+        <span class="mono grande" id="montoRecibo"></span>
+        <span class="muted">Importe total del período</span>
+      </div>
+      <canvas id="raspar" aria-label="Zona para raspar"></canvas>
+    </div>
+    <table class="desglose" id="desglose" hidden>
+      <tbody id="cuerpoDesglose"></tbody>
+      <tfoot><tr><td>Total a pagar</td><td class="num mono" id="totalRecibo"></td></tr></tfoot>
+    </table>
+    <div class="terminos" id="terminos" tabindex="0"></div>
+    <label class="check"><input type="checkbox" id="chkTerminos" disabled> <span id="txtTerminos">Leí los términos y condiciones hasta el final</span></label>
+    <div class="fila">
+      <span class="muted">Revelado <b class="mono" id="progresoRaspado">0%</b> de 60% requerido<br>Recargo por mora en <b class="mono" id="moraRestante">0:45</b></span>
+      <button class="btn btn-primario" id="btnContinuar" disabled>Continuar al pago</button>
+    </div>
+  </section>
+
+  <!-- FASE: ruleta -->
+  <section class="tarjeta" data-fase="ruleta">
+    <h2>Método de pago</h2>
+    <p class="muted">No es necesario que elija. El sistema lo hará por usted, junto con el monto de este turno.</p>
+    <div class="ruleta-caja"><canvas id="ruleta" aria-label="Ruleta de métodos de pago"></canvas></div>
+    <div class="identidad">
+      <label for="inpIdentidad" class="muted">Confirme su identidad: últimos 4 dígitos del recibo</label>
+      <input class="campo" id="inpIdentidad" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="····">
+      <span id="txtIdentidad" class="muted"></span>
+    </div>
+    <div class="fila">
+      <button class="btn" id="btnVolver">Volver al recibo</button>
+      <button class="btn btn-primario" id="btnGirar">Girar</button>
+    </div>
+    <p class="ayuda">Se asignará entre el 20% y el 50% del saldo. Puede volver al recibo para consultar su número; el contador de mora seguirá corriendo.</p>
+  </section>
+
+  <!-- FASE: jugando -->
+  <section class="tarjeta" data-fase="jugando">
+    <div class="fila" style="margin:0 0 var(--s4)">
+      <h2 id="nombreJuego" style="margin:0"></h2>
+      <span class="etiqueta mono" id="montoAsignadoTxt"></span>
+    </div>
+    <div id="contenedorJuego"></div>
+  </section>
+
+  <!-- FASE: fin -->
+  <section class="tarjeta" data-fase="fin">
+    <h2>Comprobante</h2>
+    <p class="muted">Operación completada. Agradecemos su colaboración con el proceso.</p>
+    <table>
+      <thead><tr><th>#</th><th>Método</th><th class="num">Asignado</th><th class="num">Acreditado</th></tr></thead>
+      <tbody id="cuerpoHistorial"></tbody>
+      <tfoot><tr><td colspan="3">Total acreditado</td><td class="num mono" id="totalFin"></td></tr></tfoot>
+    </table>
+    <div class="resumen">
+      <div><span class="muted">Tiempo invertido</span><b class="mono" id="tiempoTotal"></b></div>
+      <div><span class="muted">Intentos fallidos</span><b class="mono" id="intentosFallidos"></b></div>
+      <div><span class="muted">Cargos adicionales</span><b class="mono" id="cargosFin"></b></div>
+    </div>
+    <div class="calificacion" id="propinaCaja">
+      <p class="muted" id="propinaTexto">Agregue una propina para el equipo que procesó su pago.</p>
+      <div class="estrellas" id="propinas"></div>
+    </div>
+    <div class="calificacion" id="calificacion">
+      <p class="muted" id="califTexto">Califique su experiencia. Es obligatorio para emitir el comprobante.</p>
+      <div class="estrellas" id="estrellas"></div>
+    </div>
+    <div class="calificacion" id="encuesta" hidden>
+      <p class="muted">¿Cómo podemos mejorar? <span class="mono" id="cntComentario">0/20</span></p>
+      <textarea class="campo" id="txtComentario" maxlength="20" placeholder="Sea breve."></textarea>
+      <div class="fila" style="margin-top:var(--s2)"><span class="muted" id="txtEncuesta"></span><button class="btn" id="btnEnviar">Enviar comentario</button></div>
+    </div>
+    <div class="fila">
+      <button class="btn" id="btnCompartir" hidden>Compartir</button>
+      <button class="btn" id="btnDescargar" disabled>Descargar comprobante</button>
+      <button class="btn btn-primario" id="btnReiniciar">Pagar otro recibo</button>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const round2 = n => Math.round(n * 100) / 100;
+const round1 = n => Math.round(n * 10) / 10;
+const cents  = n => Math.round(n * 100);
+const fmt    = n => '$ ' + n.toFixed(2);
+const REDUCIR_MOVIMIENTO = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COLOR = { text:'#1C293C', muted:'#6B7280', primary:'#FDC800', secondary:'#432DD7', danger:'#DC2626', surface:'#FFFFFF', bg:'#FBFBF9' };
+const FUENTE_MONO = 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const FUENTE = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+
+// Canvas nítido: tamaño lógico (w,h) escalado por devicePixelRatio.
+// El CSS (width:100%; height:auto) mantiene la proporción.
+function prepararCanvas(canvas, w, h) {
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return ctx;
+}
+function coordsLogicas(canvas, e, w, h) {
+  const r = canvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * w / r.width, y: (e.clientY - r.top) * h / r.height };
+}
+function mezclar(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/* ============================================================
+   MINIJUEGOS
+   Contrato: { id, nombre, montar(contenedor, montoAsignado), update(dt), desmontar() }
+   Terminan SOLO llamando a finalizar(montoLogrado). No tocan state ni DOM fuera de su contenedor.
+   ============================================================ */
+
+// --- 1. Cinta transportadora --------------------------------
+const cinta = {
+  id: 'cinta',
+  nombre: 'Cinta transportadora',
+  _: null,
+  montar(cont, monto) {
+    const W = 520, H = 220;
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${fmt(monto)}</b></span>
+        <span>Acumulado <b class="mono" data-r="acum">$ 0.00</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">30.0</b></span>
+      </div>
+      <canvas class="cinta-canvas" data-r="canvas"></canvas>
+      <p class="ayuda">Haga clic en las monedas para sumarlas hasta el monto exacto. El sistema no acepta excedentes. La cinta acelera con el tiempo.</p>`;
+    const canvas = cont.querySelector('[data-r=canvas]');
+    this._ = {
+      W, H, canvas, ctx: prepararCanvas(canvas, W, H),
+      elAcum: cont.querySelector('[data-r=acum]'), elTiempo: cont.querySelector('[data-r=tiempo]'),
+      objetivo: monto, acum: 0, tiempo: 30, velocidad: 110, tAcel: 0, tSpawn: 0.3, offset: 0,
+      monedas: [], terminado: false,
+      onClick: e => this.click(e)
+    };
+    canvas.addEventListener('pointerdown', this._.onClick);
+  },
+  click(e) {
+    const s = this._;
+    if (!s || s.terminado) return;
+    const p = coordsLogicas(s.canvas, e, s.W, s.H);
+    for (let i = s.monedas.length - 1; i >= 0; i--) {
+      const m = s.monedas[i];
+      if (Math.hypot(p.x - m.x, p.y - m.y) <= m.r) {
+        s.monedas.splice(i, 1);
+        s.acum = round2(s.acum + m.valor);
+        s.elAcum.textContent = fmt(s.acum);
+        if (cents(s.acum) > cents(s.objetivo)) { s.terminado = true; finalizar(0); }
+        else if (cents(s.acum) === cents(s.objetivo)) { s.terminado = true; finalizar(s.objetivo); }
+        return;
+      }
+    }
+  },
+  update(dt) {
+    const s = this._;
+    if (!s || s.terminado) return;
+    s.tiempo -= dt;
+    if (s.tiempo <= 0) { s.tiempo = 0; s.terminado = true; finalizar(s.acum); return; }
+    s.tAcel += dt;
+    if (s.tAcel >= 5) { s.tAcel -= 5; s.velocidad *= 1.1; }
+    s.tSpawn -= dt;
+    if (s.tSpawn <= 0) {
+      const tipo = cinta.VALORES[Math.floor(Math.random() * cinta.VALORES.length)];
+      s.monedas.push({ x: -30, y: 60 + Math.random() * 100, r: tipo.r, valor: tipo.v, color: tipo.c, texto: tipo.t });
+      s.tSpawn = 0.5 + Math.random() * 0.45;
+    }
+    for (const m of s.monedas) m.x += s.velocidad * dt;
+    s.monedas = s.monedas.filter(m => m.x - m.r < s.W + 5);
+    s.offset = (s.offset + s.velocidad * dt) % 40;
+    this.dibujar();
+    s.elTiempo.textContent = s.tiempo.toFixed(1);
+  },
+  dibujar() {
+    const { ctx, W, H, monedas, offset } = this._;
+    ctx.clearRect(0, 0, W, H);
+    // banda
+    ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 40, W, 140);
+    ctx.strokeStyle = COLOR.text; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, 40); ctx.lineTo(W, 40); ctx.moveTo(0, 180); ctx.lineTo(W, 180); ctx.stroke();
+    ctx.save(); ctx.setLineDash([20, 20]); ctx.lineDashOffset = -offset; ctx.strokeStyle = COLOR.muted; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 110); ctx.lineTo(W, 110); ctx.stroke(); ctx.restore();
+    // monedas
+    ctx.font = `700 12px ${FUENTE_MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const m of monedas) {
+      ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+      ctx.fillStyle = m.color; ctx.fill(); ctx.strokeStyle = COLOR.text; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = m.color === COLOR.secondary ? '#fff' : COLOR.text;
+      ctx.fillText(m.texto, m.x, m.y + 1);
+    }
+  },
+  desmontar() {
+    if (this._) this._.canvas.removeEventListener('pointerdown', this._.onClick);
+    this._ = null;
+  }
+};
+cinta.VALORES = [
+  { v: 0.10, r: 14, c: COLOR.surface, t: '.10' },
+  { v: 0.20, r: 16, c: COLOR.surface, t: '.20' },
+  { v: 0.50, r: 18, c: COLOR.bg,      t: '.50' },
+  { v: 1.00, r: 20, c: COLOR.primary, t: '1' },
+  { v: 2.00, r: 22, c: COLOR.primary, t: '2' },
+  { v: 5.00, r: 26, c: COLOR.secondary, t: '5' }
+];
+
+// --- 2. Teclado errante --------------------------------------
+const teclado = {
+  id: 'teclado',
+  nombre: 'Teclado errante',
+  _: null,
+  montar(cont, monto) {
+    const objetivo = monto.toFixed(2);
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${objetivo}</b></span>
+        <span>Ingresado <b class="mono" data-r="ing">&nbsp;</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">20.0</b></span>
+      </div>
+      <div class="teclado" data-r="grid"></div>
+      <p class="ayuda">Ingrese el monto exacto, incluido el punto decimal. Las teclas se reorganizan por su seguridad. No existe tecla de borrado.</p>`;
+    this._ = {
+      objetivo, ingresado: '', tiempo: 20, terminado: false,
+      grid: cont.querySelector('[data-r=grid]'), elIng: cont.querySelector('[data-r=ing]'), elTiempo: cont.querySelector('[data-r=tiempo]'),
+      onClick: e => { const b = e.target.closest('[data-t]'); if (b) this.pulsar(b.dataset.t); }
+    };
+    this._.grid.addEventListener('click', this._.onClick);
+    this.dibujarTeclas();
+  },
+  dibujarTeclas() {
+    const teclas = mezclar(['0','1','2','3','4','5','6','7','8','9','.']);
+    this._.grid.innerHTML = teclas.map(t => `<button class="btn tecla mono" data-t="${t}">${t}</button>`).join('');
+  },
+  pulsar(t) {
+    const s = this._;
+    if (!s || s.terminado) return;
+    if (t !== s.objetivo[s.ingresado.length]) { s.terminado = true; finalizar(0); return; }
+    s.ingresado += t;
+    s.elIng.textContent = s.ingresado;
+    if (s.ingresado === s.objetivo) { s.terminado = true; finalizar(parseFloat(s.objetivo)); return; }
+    this.dibujarTeclas();
+  },
+  update(dt) {
+    const s = this._;
+    if (!s || s.terminado) return;
+    s.tiempo -= dt;
+    if (s.tiempo <= 0) { s.terminado = true; finalizar(0); return; }
+    s.elTiempo.textContent = s.tiempo.toFixed(1);
+  },
+  desmontar() {
+    if (this._) this._.grid.removeEventListener('click', this._.onClick);
+    this._ = null;
+  }
+};
+
+// --- 3. Pulso sostenido --------------------------------------
+const pulso = {
+  id: 'pulso',
+  nombre: 'Pulso sostenido',
+  _: null,
+  montar(cont, monto) {
+    const tol = tolerancia(monto);
+    const tope = monto * 1.5;
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${fmt(monto)}</b></span>
+        <span>Tolerancia <b class="mono">± ${tol.toFixed(2)}</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">15.0</b></span>
+      </div>
+      <div class="contador mono" data-r="valor">$ 0.00</div>
+      <div class="barra-prog"><div class="barra-fill" data-r="fill"></div><div class="barra-marca" style="left:${(monto / tope * 100).toFixed(2)}%"></div></div>
+      <button class="btn btn-secundario btn-bloque" data-r="btn">Mantener presionado</button>
+      <p class="ayuda">Suelte cuando el contador coincida con su monto. Si suelta antes, se acredita lo alcanzado redondeado hacia abajo. Si se pasa, no se acredita nada. La precisión es responsabilidad del usuario.</p>`;
+    const btn = cont.querySelector('[data-r=btn]');
+    this._ = {
+      objetivo: monto, tol, tope, valor: 0, velocidad: monto / 4, presionando: false, tiempo: 15, terminado: false,
+      btn, elValor: cont.querySelector('[data-r=valor]'), elFill: cont.querySelector('[data-r=fill]'), elTiempo: cont.querySelector('[data-r=tiempo]'),
+      onDown: e => { if (this._ && !this._.terminado) { this._.presionando = true; btn.setPointerCapture(e.pointerId); } },
+      onUp: () => this.soltar()
+    };
+    btn.addEventListener('pointerdown', this._.onDown);
+    btn.addEventListener('pointerup', this._.onUp);
+    btn.addEventListener('pointercancel', this._.onUp);
+  },
+  soltar() {
+    const s = this._;
+    if (!s || s.terminado || !s.presionando) return;
+    s.presionando = false; s.terminado = true;
+    cerrarPrecision(s.valor, s.objetivo, s.tol);
+  },
+  update(dt) {
+    const s = this._;
+    if (!s || s.terminado) return;
+    s.tiempo -= dt;
+    if (s.presionando) {
+      s.valor += s.velocidad * dt;
+      if (s.valor >= s.tope) { s.valor = s.tope; this.soltar(); return; }
+    }
+    if (s.tiempo <= 0) {
+      if (s.presionando) { this.soltar(); } else { s.terminado = true; finalizar(0); }
+      return;
+    }
+    s.elValor.textContent = fmt(s.valor);
+    s.elFill.style.width = (s.valor / s.tope * 100).toFixed(2) + '%';
+    s.elTiempo.textContent = s.tiempo.toFixed(1);
+  },
+  desmontar() {
+    if (this._) {
+      const { btn, onDown, onUp } = this._;
+      btn.removeEventListener('pointerdown', onDown);
+      btn.removeEventListener('pointerup', onUp);
+      btn.removeEventListener('pointercancel', onUp);
+    }
+    this._ = null;
+  }
+};
+
+// Cierre común para los juegos "de precisión": exacto (±tol) acredita todo,
+// por debajo acredita lo alcanzado redondeado a 0.10, por encima no acredita.
+function cerrarPrecision(valor, objetivo, tol) {
+  const d = valor - objetivo;
+  if (Math.abs(d) <= tol + 1e-9) finalizar(objetivo);
+  else if (d < 0) finalizar(Math.floor(cents(valor) / 10) / 10);
+  else finalizar(0);
+}
+const tolerancia = monto => Math.max(0.05, round1(monto * 0.03));
+
+// --- 4. Deslizador fugitivo ----------------------------------
+// Homenaje al concurso "worst volume control" (Reddit, 2017): la perilla vuelve sola a cero.
+const deslizador = {
+  id: 'deslizador',
+  nombre: 'Deslizador fugitivo',
+  _: null,
+  montar(cont, monto) {
+    const tol = tolerancia(monto), tope = round2(monto * 1.5);
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${fmt(monto)}</b></span>
+        <span>Tolerancia <b class="mono">± ${tol.toFixed(2)}</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">20.0</b></span>
+      </div>
+      <div class="contador mono" data-r="valor">$ 0.00</div>
+      <input type="range" class="rango" data-r="rango" min="0" max="${tope}" step="0.01" value="0" aria-label="Monto">
+      <button class="btn btn-secundario btn-bloque" data-r="btn">Confirmar monto</button>
+      <p class="ayuda">Arrastre hasta el monto exacto y confirme. La perilla regresa sola a cero cuando la suelta. Es una medida de seguridad.</p>`;
+    const rango = cont.querySelector('[data-r=rango]');
+    this._ = {
+      objetivo: monto, tol, tope, valor: 0, arrastrando: false, tiempo: 20, terminado: false, deriva: Math.max(0.6, monto * 0.12), ultimaInteraccion: 0,
+      rango, elValor: cont.querySelector('[data-r=valor]'), elTiempo: cont.querySelector('[data-r=tiempo]'), btn: cont.querySelector('[data-r=btn]'),
+      onInput: () => { if (this._) { this._.valor = parseFloat(rango.value); this._.ultimaInteraccion = performance.now(); } },
+      onDown: () => { if (this._) this._.arrastrando = true; },
+      onUp: () => { if (this._) this._.arrastrando = false; },
+      onConfirmar: () => { const s = this._; if (!s || s.terminado) return; s.terminado = true; cerrarPrecision(s.valor, s.objetivo, s.tol); }
+    };
+    rango.addEventListener('input', this._.onInput);
+    rango.addEventListener('pointerdown', this._.onDown);
+    rango.addEventListener('pointerup', this._.onUp);
+    rango.addEventListener('pointercancel', this._.onUp);
+    this._.btn.addEventListener('click', this._.onConfirmar);
+  },
+  update(dt) {
+    const s = this._; if (!s || s.terminado) return;
+    s.tiempo -= dt;
+    if (s.tiempo <= 0) { s.terminado = true; cerrarPrecision(s.valor, s.objetivo, s.tol); return; }
+    if (!s.arrastrando && s.valor > 0 && performance.now() - s.ultimaInteraccion > 600) { s.valor = Math.max(0, s.valor - s.deriva * dt); s.rango.value = s.valor.toFixed(2); }
+    s.elValor.textContent = fmt(s.valor);
+    s.elTiempo.textContent = s.tiempo.toFixed(1);
+  },
+  desmontar() {
+    if (this._) {
+      const { rango, btn, onInput, onDown, onUp, onConfirmar } = this._;
+      rango.removeEventListener('input', onInput); rango.removeEventListener('pointerdown', onDown);
+      rango.removeEventListener('pointerup', onUp); rango.removeEventListener('pointercancel', onUp);
+      btn.removeEventListener('click', onConfirmar);
+    }
+    this._ = null;
+  }
+};
+
+// --- 5. Monto por desplazamiento -----------------------------
+// 24.000 px de scroll para elegir un número. El scroll además avanza solo.
+const desplazamiento = {
+  id: 'desplazamiento',
+  nombre: 'Monto por desplazamiento',
+  _: null,
+  montar(cont, monto) {
+    const tol = tolerancia(monto), tope = round2(monto * 1.5);
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${fmt(monto)}</b></span>
+        <span>Tolerancia <b class="mono">± ${tol.toFixed(2)}</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">25.0</b></span>
+      </div>
+      <div class="contador mono" data-r="valor">$ 0.00</div>
+      <div class="scroller" data-r="sc" tabindex="0"><div></div></div>
+      <button class="btn btn-secundario btn-bloque" data-r="btn">Confirmar monto</button>
+      <p class="ayuda">Desplace el área hasta que el contador muestre su monto exacto y confirme. El área se desplaza sola lentamente para su comodidad.</p>`;
+    const sc = cont.querySelector('[data-r=sc]');
+    this._ = {
+      objetivo: monto, tol, tope, valor: 0, tiempo: 25, terminado: false, sc, ultimoScroll: 0,
+      elValor: cont.querySelector('[data-r=valor]'), elTiempo: cont.querySelector('[data-r=tiempo]'), btn: cont.querySelector('[data-r=btn]'),
+      onScroll: () => { if (this._) this._.ultimoScroll = performance.now(); },
+      onConfirmar: () => { const s = this._; if (!s || s.terminado) return; s.terminado = true; cerrarPrecision(s.valor, s.objetivo, s.tol); }
+    };
+    sc.addEventListener('scroll', this._.onScroll);
+    this._.btn.addEventListener('click', this._.onConfirmar);
+  },
+  update(dt) {
+    const s = this._; if (!s || s.terminado) return;
+    s.tiempo -= dt;
+    if (s.tiempo <= 0) { s.terminado = true; cerrarPrecision(s.valor, s.objetivo, s.tol); return; }
+    const max = s.sc.scrollHeight - s.sc.clientHeight;
+    if (performance.now() - s.ultimoScroll > 400 && s.sc.scrollTop < max) s.sc.scrollTop += 9 * dt; // deriva
+    s.valor = max > 0 ? round2(s.sc.scrollTop / max * s.tope) : 0;
+    s.elValor.textContent = fmt(s.valor);
+    s.elTiempo.textContent = s.tiempo.toFixed(1);
+  },
+  desmontar() {
+    if (this._) { this._.sc.removeEventListener('scroll', this._.onScroll); this._.btn.removeEventListener('click', this._.onConfirmar); }
+    this._ = null;
+  }
+};
+
+// --- 6. Caída libre --------------------------------------------
+// Una bola, una grilla de clavos, siete casillas. El monto lo decide la física.
+const caida = {
+  id: 'caida',
+  nombre: 'Caída libre',
+  _: null,
+  montar(cont, monto) {
+    const W = 520, H = 320;
+    cont.innerHTML = `
+      <div class="juego-cab">
+        <span>Objetivo <b class="mono">${fmt(monto)}</b></span>
+        <span>Estado <b data-r="estado">Elija dónde soltar</b></span>
+        <span>Tiempo <b class="mono" data-r="tiempo">15.0</b></span>
+      </div>
+      <canvas class="plinko" data-r="canvas"></canvas>
+      <p class="ayuda">Haga clic en la parte superior para soltar la bola. La casilla donde caiga determina cuánto se acredita. Solo tiene una bola.</p>`;
+    const canvas = cont.querySelector('[data-r=canvas]');
+    const casillas = [0, round1(monto * 0.3), round1(monto * 0.6), monto, round1(monto * 0.6), round1(monto * 0.3), 0];
+    const clavos = [];
+    for (let f = 0; f < 6; f++) for (let c = 0; c <= 8; c++) {
+      const x = 30 + c * 57.5 + (f % 2 ? 28.75 : 0); if (x > W - 20) continue;
+      clavos.push({ x, y: 70 + f * 34 });
+    }
+    this._ = {
+      W, H, canvas, ctx: prepararCanvas(canvas, W, H), casillas, clavos, bola: null, tiempo: 15, terminado: false,
+      elEstado: cont.querySelector('[data-r=estado]'), elTiempo: cont.querySelector('[data-r=tiempo]'),
+      onClick: e => {
+        const s = this._; if (!s || s.bola || s.terminado) return;
+        const p = coordsLogicas(canvas, e, W, H);
+        s.bola = { x: Math.min(W - 12, Math.max(12, p.x)), y: 14, vx: 0, vy: 0, r: 9 };
+        s.elEstado.textContent = 'En caída';
+      }
+    };
+    canvas.addEventListener('pointerdown', this._.onClick);
+    this.dibujar();
+  },
+  update(dt) {
+    const s = this._; if (!s || s.terminado) return;
+    if (!s.bola) {
+      s.tiempo -= dt; s.elTiempo.textContent = Math.max(0, s.tiempo).toFixed(1);
+      if (s.tiempo <= 0) { s.terminado = true; finalizar(0); return; }
+    } else {
+      const b = s.bola, pasos = 4, h = dt / pasos;
+      for (let i = 0; i < pasos; i++) {
+        b.vy += 900 * h; b.x += b.vx * h; b.y += b.vy * h;
+        if (b.x < b.r) { b.x = b.r; b.vx = -b.vx * 0.5; }
+        if (b.x > s.W - b.r) { b.x = s.W - b.r; b.vx = -b.vx * 0.5; }
+        for (const c of s.clavos) {
+          const dx = b.x - c.x, dy = b.y - c.y, d = Math.hypot(dx, dy), min = b.r + 5;
+          if (d < min && d > 0) {
+            const nx = dx / d, ny = dy / d, dot = b.vx * nx + b.vy * ny;
+            b.x = c.x + nx * min; b.y = c.y + ny * min;
+            b.vx = (b.vx - 2 * dot * nx) * 0.55 + (Math.random() - 0.5) * 40;
+            b.vy = (b.vy - 2 * dot * ny) * 0.55;
+          }
+        }
+      }
+      if (b.y > s.H - 30) {
+        s.terminado = true;
+        const idx = Math.min(6, Math.floor(b.x / (s.W / 7)));
+        finalizar(s.casillas[idx]);
+        return;
+      }
+    }
+    this.dibujar();
+  },
+  dibujar() {
+    const { ctx, W, H, clavos, casillas, bola, objetivo } = this._;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = COLOR.bg; ctx.fillRect(0, 0, W, 30);
+    ctx.fillStyle = COLOR.muted; ctx.font = `700 11px ${FUENTE}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (!bola) ctx.fillText('Haga clic aquí para soltar', W / 2, 15);
+    ctx.fillStyle = COLOR.text;
+    for (const c of clavos) { ctx.beginPath(); ctx.arc(c.x, c.y, 5, 0, Math.PI * 2); ctx.fill(); }
+    const ancho = W / 7;
+    for (let i = 0; i < 7; i++) {
+      const x = i * ancho, exacto = i === 3, cero = casillas[i] === 0;
+      ctx.fillStyle = exacto ? COLOR.primary : cero ? COLOR.danger : COLOR.bg;
+      ctx.fillRect(x, H - 40, ancho, 40);
+      ctx.strokeStyle = COLOR.text; ctx.lineWidth = 3; ctx.strokeRect(x, H - 40, ancho, 40);
+      ctx.fillStyle = cero ? '#fff' : COLOR.text; ctx.font = `700 12px ${FUENTE_MONO}`;
+      ctx.fillText(casillas[i].toFixed(2), x + ancho / 2, H - 20);
+    }
+    if (bola) {
+      ctx.beginPath(); ctx.arc(bola.x, bola.y, bola.r, 0, Math.PI * 2);
+      ctx.fillStyle = COLOR.secondary; ctx.fill(); ctx.strokeStyle = COLOR.text; ctx.lineWidth = 3; ctx.stroke();
+    }
+  },
+  desmontar() {
+    if (this._) this._.canvas.removeEventListener('pointerdown', this._.onClick);
+    this._ = null;
+  }
+};
+
+// --- 7. Cambio de monto (no se juega; el saldo sube) --------
+const cambio = {
+  id: 'cambio',
+  nombre: 'Cambio de monto',
+  _: null,
+  montar(cont) {
+    cont.innerHTML = `<div class="espera"><p class="grande mono" data-r="t">5</p><p>Su saldo será recalculado con un ajuste del 10%.<br>No se requiere ninguna acción de su parte.</p></div>`;
+    this._ = { tiempo: 5, el: cont.querySelector('[data-r=t]'), terminado: false };
+  },
+  update(dt) {
+    const s = this._; if (!s || s.terminado) return;
+    s.tiempo -= dt; s.el.textContent = Math.max(0, Math.ceil(s.tiempo));
+    if (s.tiempo <= 0) { s.terminado = true; finalizar(-1); } // -1: señal de ajuste, ver FINALIZAR
+  },
+  desmontar() { this._ = null; }
+};
+
+// --- 8. Sin método disponible (no se juega; se pierde) ------
+const nada = {
+  id: 'nada',
+  nombre: 'Sin método disponible',
+  _: null,
+  montar(cont) {
+    cont.innerHTML = `<div class="espera"><p class="grande mono" data-r="t">6</p><p>En este momento no hay métodos de pago disponibles para su zona.<br>Su turno será cerrado automáticamente.</p></div>`;
+    this._ = { tiempo: 6, el: cont.querySelector('[data-r=t]'), terminado: false };
+  },
+  update(dt) {
+    const s = this._; if (!s || s.terminado) return;
+    s.tiempo -= dt; s.el.textContent = Math.max(0, Math.ceil(s.tiempo));
+    if (s.tiempo <= 0) { s.terminado = true; finalizar(0); }
+  },
+  desmontar() { this._ = null; }
+};
+
+// Agregar un minijuego = agregarlo acá. La ruleta y el flujo se adaptan solos.
+const MINIJUEGOS = [cinta, teclado, pulso, deslizador, desplazamiento, caida, cambio, nada];
+
+/* ============================================================
+   ESTADO (único objeto)
+   ============================================================ */
+const state = {
+  saldoTotal: 87.40,
+  saldoPendiente: 87.40,
+  montoRevelado: false,
+  porcentajeRaspado: 0,
+  fase: 'recibo',            // 'recibo' | 'ruleta' | 'jugando' | 'fin'
+  metodoActual: null,        // id del minijuego
+  montoAsignado: 0,
+  historialGiros: [],        // [{ metodo, asignado, logrado }]
+  girando: false,
+  ruleta: { angulo: 0, velocidad: 0, calibrando: 0, espera: 0, inactivo: 0 },
+  codigoRestante: 8,         // segundos de visibilidad del código; luego se tapa
+  propina: 0,                // % elegido al final
+  propinaPendiente: 0,       // monto que se cobra en el próximo recibo
+  mensaje: '',
+  mensajeTipo: 'info',       // 'info' | 'error' | 'exito'
+  conceptos: [{ concepto: 'Energía eléctrica', monto: 52.10 }, { concepto: 'Agua potable', monto: 35.30 }],
+  cargos: [],                // [{ concepto, monto }] — se suman al saldo pendiente
+  moraRestante: 45,          // segundos hasta el próximo recargo (solo en fase recibo)
+  tiempoInicio: performance.now(),
+  tiempoTotal: 0,            // ms, se fija al llegar a 'fin'
+  calificacion: 0,
+  comentario: '',
+  comentarioEnviado: false,
+  terminos: { lecturas: 0, aceptado: false },   // hay que llegar al final 2 veces
+  identidad: { texto: '', inactivo: 0, ok: false }, // se borra tras 5 s sin escribir
+  rachaFallos: 0,
+  oscuro: false,
+  recibosPagados: 0,
+  nroRecibo: '0048-2211'
+};
+const MORA_INTERVALO = 45, MORA_MONTO = 0.50, CARGO_CONSULTA = 1.50, COMISION_FALLO = 0.50, CARGO_RECURRENTE = 2.00, CARGO_CODIGO = 0.30, CODIGO_VISIBLE = 8, RULETA_AUTO = 10;
+const TERMINOS_BASE = 14, TERMINOS_EXTRA = 8;
+const avisar = (texto, tipo = 'info') => { state.mensaje = texto; state.mensajeTipo = tipo; };
+function agregarCargo(concepto, monto) {
+  monto = round2(monto);
+  const previo = state.cargos.find(c => c.concepto === concepto);
+  if (previo) previo.monto = round2(previo.monto + monto); else state.cargos.push({ concepto, monto });
+  state.saldoPendiente = round2(state.saldoPendiente + monto);
+}
+const totalCargos = () => round2(state.cargos.reduce((s, c) => s + c.monto, 0));
+
+// Monto del turno: 20%—50% del pendiente. Se redondea a 0.10 para que sea alcanzable
+// con las monedas de la cinta; si queda poco saldo, se asigna todo.
+function calcularAsignado(pendiente) {
+  if (pendiente <= 1) return round2(pendiente);
+  const m = round1(pendiente * (0.2 + Math.random() * 0.3));
+  return round2(Math.max(0.1, Math.min(m, pendiente)));
+}
+function sectorEnPuntero() {
+  const n = MINIJUEGOS.length, paso = 2 * Math.PI / n;
+  let a = (-Math.PI / 2 - state.ruleta.angulo) % (2 * Math.PI);
+  if (a < 0) a += 2 * Math.PI;
+  return Math.floor(a / paso) % n;
+}
+
+/* ============================================================
+   aplicar(accion): la ÚNICA función que muta state
+   ============================================================ */
+function aplicar(a) {
+  switch (a.tipo) {
+    case 'RASPAR':
+      if (state.fase !== 'recibo') break;
+      state.porcentajeRaspado = a.porcentaje;
+      if (!state.montoRevelado && a.porcentaje >= 0.6) {
+        state.montoRevelado = true;
+        agregarCargo('Consulta de importe', CARGO_CONSULTA);
+        if (Math.random() < 0.35) agregarCargo('Ajuste de período anterior', round1(0.5 + Math.random() * 3.5));
+        avisar('Gracias por su paciencia. Se aplicó un cargo por consulta de importe.');
+      }
+      break;
+
+    case 'TICK_RECIBO':
+      if (state.fase !== 'recibo') break;
+      state.moraRestante -= a.dt;
+      if (state.codigoRestante > 0) state.codigoRestante = Math.max(0, state.codigoRestante - a.dt);
+      if (state.moraRestante <= 0) {
+        state.moraRestante += MORA_INTERVALO;
+        agregarCargo('Recargo por mora', MORA_MONTO);
+        avisar('Se aplicó un recargo por mora. Le recordamos que el recibo vence hoy.', 'error');
+      }
+      break;
+
+    case 'TERMINOS_FIN': // llegó al final del texto
+      if (state.fase !== 'recibo' || state.terminos.aceptado) break;
+      state.terminos.lecturas++;
+      if (state.terminos.lecturas === 1) avisar('Los términos fueron actualizados mientras los leía. Por favor, vuelva a leerlos.', 'error');
+      break;
+
+    case 'TERMINOS_ACEPTAR':
+      if (state.fase === 'recibo' && state.terminos.lecturas >= 2) state.terminos.aceptado = !!a.valor;
+      break;
+
+    case 'IDENTIDAD_ESCRIBIR': {
+      if (state.fase !== 'ruleta' || state.girando) break;
+      const t = a.texto.replace(/\D/g, '').slice(0, 4);
+      state.identidad.texto = t; state.identidad.inactivo = 0;
+      state.identidad.ok = t === state.nroRecibo.slice(-4);
+      break;
+    }
+
+    case 'TICK_IDENTIDAD':
+      if (state.fase !== 'ruleta' || state.girando || state.identidad.ok || !state.identidad.texto) break;
+      state.identidad.inactivo += a.dt;
+      if (state.identidad.inactivo >= 5) {
+        state.identidad = { texto: '', inactivo: 0, ok: false };
+        avisar('El campo fue vaciado por inactividad. Por su seguridad.', 'error');
+      }
+      break;
+
+    case 'COMENTAR':
+      if (state.fase === 'fin' && !state.comentarioEnviado) state.comentario = a.texto.slice(0, 20);
+      break;
+
+    case 'ENVIAR_COMENTARIO':
+      if (state.fase === 'fin' && state.calificacion && !state.comentarioEnviado) {
+        state.comentarioEnviado = true;
+        avisar('Su comentario fue archivado.');
+      }
+      break;
+
+    case 'MOSTRAR_CODIGO':
+      if (state.fase === 'recibo' && state.codigoRestante <= 0) {
+        state.codigoRestante = CODIGO_VISIBLE;
+        agregarCargo('Consulta de código', CARGO_CODIGO);
+        avisar(`Se aplicó un cargo de ${fmt(CARGO_CODIGO)} por consulta de código.`, 'error');
+      }
+      break;
+
+    case 'TICK_RULETA_INACTIVA': // la ruleta se cansa de esperar
+      if (state.fase !== 'ruleta' || state.girando || !state.identidad.ok) break;
+      state.ruleta.inactivo += a.dt;
+      if (state.ruleta.inactivo >= RULETA_AUTO) {
+        state.ruleta.inactivo = 0;
+        state.girando = true;
+        state.identidad = { texto: '', inactivo: 0, ok: false };
+        state.ruleta.velocidad = REDUCIR_MOVIMIENTO ? 4 + Math.random() * 2 : 10 + Math.random() * 4;
+        avisar('Iniciamos el giro por usted. Su tiempo es valioso.', 'error');
+      }
+      break;
+
+    case 'PROPINA':
+      if (state.fase === 'fin' && [10, 15, 20].includes(a.valor) && !state.propina) {
+        state.propina = a.valor;
+        state.propinaPendiente = round2(state.saldoTotal * a.valor / 100);
+        avisar(`Gracias por su generosidad. La propina del ${a.valor}% se incluirá en su próximo recibo.`, 'exito');
+      }
+      break;
+
+    case 'CALIFICAR':
+      if (state.fase === 'fin' && a.valor === 5 && state.propina) {
+        state.calificacion = 5;
+        avisar('Gracias. Su opinión es importante para nosotros.', 'exito');
+      }
+      break;
+
+    case 'IR_A_RULETA':
+      if (state.fase === 'recibo' && state.montoRevelado && state.terminos.aceptado) {
+        state.fase = 'ruleta';
+        avisar('Su recibo fue registrado. A continuación se le asignará un método de pago.');
+      }
+      break;
+
+    case 'VOLVER_RECIBO':
+      if (state.fase === 'ruleta' && !state.girando) {
+        state.fase = 'recibo';
+        state.identidad = { texto: '', inactivo: 0, ok: false };
+        avisar('Regresó al recibo. El contador de mora continúa activo.', 'error');
+      }
+      break;
+
+    case 'GIRAR':
+      if (state.fase === 'ruleta' && !state.girando && state.identidad.ok) {
+        state.girando = true;
+        state.ruleta.inactivo = 0;
+        state.identidad = { texto: '', inactivo: 0, ok: false };
+        state.ruleta.velocidad = REDUCIR_MOVIMIENTO ? 4 + Math.random() * 2 : 10 + Math.random() * 4;
+        avisar('Asignando su método de pago preferido.');
+      }
+      break;
+
+    case 'TICK_RULETA': {
+      const r = state.ruleta;
+      if (r.calibrando > 0) {                       // retrocede despacio "por calibración"
+        r.calibrando -= a.dt;
+        r.angulo = (r.angulo - 0.9 * a.dt + 2 * Math.PI) % (2 * Math.PI);
+        if (r.calibrando <= 0) { r.calibrando = 0; r.espera = 1.6; avisar(`Ajuste por calibración. Método asignado: ${MINIJUEGOS[sectorEnPuntero()].nombre}.`); }
+        break;
+      }
+      if (r.espera > 0) {                           // muestra el resultado antes de montar el juego
+        r.espera -= a.dt;
+        if (r.espera <= 0) {
+          r.espera = 0; state.girando = false;
+          state.metodoActual = MINIJUEGOS[sectorEnPuntero()].id;
+          state.montoAsignado = calcularAsignado(state.saldoPendiente);
+          state.fase = 'jugando';
+          avisar('');
+        }
+        break;
+      }
+      r.angulo = (r.angulo + r.velocidad * a.dt) % (2 * Math.PI);
+      r.velocidad = r.velocidad * (1 - 0.4 * a.dt) - 2.2 * a.dt;
+      if (r.velocidad <= 0.15) {
+        r.velocidad = 0;
+        if (Math.random() < 0.3) { r.calibrando = 0.5 + Math.random() * 0.9; avisar('Calibrando resultado.', 'error'); }
+        else { r.espera = 1.6; avisar(`Método asignado: ${MINIJUEGOS[sectorEnPuntero()].nombre}.`); }
+      }
+      break;
+    }
+
+    case 'FINALIZAR': {
+      if (state.fase !== 'jugando') break;
+      const juego = MINIJUEGOS.find(j => j.id === state.metodoActual);
+      if (a.logrado === -1) {                         // ajuste del 10%: no se juega, no cuenta como fallo
+        const ajuste = round1(state.saldoPendiente * 0.1);
+        state.historialGiros.push({ metodo: juego.nombre, asignado: 0, logrado: 0 });
+        agregarCargo('Ajuste de saldo (10%)', ajuste);
+        avisar(`Su saldo fue ajustado en ${fmt(ajuste)}.`, 'error');
+        state.metodoActual = null; state.montoAsignado = 0; state.fase = 'ruleta';
+        break;
+      }
+      const logrado = round2(Math.min(Math.max(a.logrado || 0, 0), state.montoAsignado));
+      state.historialGiros.push({ metodo: juego.nombre, asignado: state.montoAsignado, logrado });
+      state.saldoPendiente = round2(state.saldoPendiente - logrado);
+      if (logrado === 0) {
+        agregarCargo('Comisión por intento fallido', COMISION_FALLO);
+        state.rachaFallos++;
+        avisar(`Su aporte no pudo ser acreditado. Se aplicó una comisión de ${fmt(COMISION_FALLO)}. Puede volver a intentarlo.`, 'error');
+        if (state.rachaFallos >= 3 && !state.oscuro) { state.oscuro = true; avisar('Se activó el modo de descanso visual para reducir su fatiga. No es posible desactivarlo.', 'error'); }
+      } else {
+        state.rachaFallos = 0;
+        if (cents(logrado) < cents(state.montoAsignado)) avisar(`Se acreditaron ${fmt(logrado)}. El resto del turno no pudo ser procesado.`, 'error');
+        else avisar(`Se acreditaron ${fmt(logrado)}. Turno completado.`, 'exito');
+      }
+      if (state.saldoPendiente > 0 && state.saldoPendiente < 1) {
+        agregarCargo('Cargo por saldo menor', 1 - state.saldoPendiente);
+        avisar('Su saldo restante era inferior a $ 1.00 y fue ajustado al mínimo operativo.', 'error');
+      }
+      state.metodoActual = null;
+      state.montoAsignado = 0;
+      state.fase = state.saldoPendiente <= 0 ? 'fin' : 'ruleta';
+      if (state.fase === 'fin') {
+        state.tiempoTotal = performance.now() - state.tiempoInicio;
+        state.recibosPagados++;
+        avisar('Su pago fue completado. Gracias por elegirnos, aunque no haya sido su decisión.', 'exito');
+      }
+      break;
+    }
+
+    case 'REINICIAR':
+      state.saldoPendiente = state.saldoTotal;
+      state.montoRevelado = false;
+      state.porcentajeRaspado = 0;
+      state.fase = 'recibo';
+      state.metodoActual = null;
+      state.montoAsignado = 0;
+      state.historialGiros = [];
+      state.girando = false;
+      avisar('');
+      state.cargos = [];
+      state.comentario = ''; state.comentarioEnviado = false;
+      state.terminos = { lecturas: 0, aceptado: false };
+      state.identidad = { texto: '', inactivo: 0, ok: false };
+      state.rachaFallos = 0; state.oscuro = false;
+      state.codigoRestante = CODIGO_VISIBLE;
+      state.ruleta = { angulo: 0, velocidad: 0, calibrando: 0, espera: 0, inactivo: 0 };
+      if (state.propinaPendiente > 0) { agregarCargo('Propina comprometida', state.propinaPendiente); state.propinaPendiente = 0; }
+      state.propina = 0;
+      state.nroRecibo = '0048-' + String(2211 + state.recibosPagados).padStart(4, '0');
+      if (state.recibosPagados > 0) {
+        agregarCargo('Cargo por cliente recurrente', CARGO_RECURRENTE * state.recibosPagados);
+        avisar(`Bienvenido nuevamente. Se aplicó un cargo por cliente recurrente de ${fmt(CARGO_RECURRENTE * state.recibosPagados)}.`, 'error');
+      }
+      state.moraRestante = MORA_INTERVALO;
+      state.tiempoInicio = performance.now();
+      state.tiempoTotal = 0;
+      state.calificacion = 0;
+      ui.raspar = null; // fuerza a re-preparar la capa gris
+      break;
+  }
+  render();
+}
+
+// Única vía por la que un minijuego acredita.
+function finalizar(montoLogrado) {
+  aplicar({ tipo: 'FINALIZAR', logrado: montoLogrado });
+}
+
+/* ============================================================
+   render(): redibuja la UI leyendo state. No muta state.
+   `ui` guarda referencias a canvas/contextos (infraestructura, no estado de la app).
+   ============================================================ */
+const ui = { raspar: null, ruleta: null };
+let juegoActivo = null; // instancia montada actualmente
+
+function render() {
+  document.querySelectorAll('[data-fase]').forEach(el => { el.hidden = el.dataset.fase !== state.fase; });
+
+  $('#barraSaldo').hidden = state.fase === 'recibo';
+  $('#saldoPendiente').textContent = fmt(Math.max(0, state.saldoPendiente));
+  $('#cantGiros').textContent = state.historialGiros.length;
+  $('#mensaje').hidden = !state.mensaje;
+  $('#mensaje').textContent = state.mensaje;
+  $('#mensaje').classList.toggle('error', state.mensajeTipo === 'error');
+  $('#mensaje').classList.toggle('exito', state.mensajeTipo === 'exito');
+  document.body.classList.toggle('oscuro', state.oscuro);
+  sonar(); // efectos de sonido derivados del state (no lo mutan)
+
+  // recibo
+  if (state.fase === 'recibo') {
+    if (!ui.raspar) prepararRaspado();
+    $('#montoRecibo').textContent = fmt(state.saldoTotal);
+    $('#progresoRaspado').textContent = Math.round(state.porcentajeRaspado * 100) + '%';
+    $('#btnContinuar').disabled = !(state.montoRevelado && state.terminos.aceptado);
+    $('#raspar').classList.toggle('revelado', state.montoRevelado);
+    $('#nroRecibo').textContent = state.nroRecibo;
+    const visible = state.codigoRestante > 0;
+    $('#codigoRecibo').textContent = visible ? state.nroRecibo.slice(-4) : '••••';
+    $('#codigoTexto').textContent = visible
+      ? `Recuerde este número. Se le pedirá en cada intento de pago. Visible por ${Math.ceil(state.codigoRestante)} s.`
+      : 'El código fue ocultado por seguridad.';
+    $('#btnMostrarCodigo').hidden = visible;
+    $('#btnContinuar').textContent = state.historialGiros.length ? 'Volver al pago' : 'Continuar al pago';
+    renderTerminos();
+    const m = Math.max(0, Math.ceil(state.moraRestante));
+    $('#moraRestante').textContent = `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+    $('#desglose').hidden = !state.montoRevelado;
+    if (state.montoRevelado) {
+      $('#cuerpoDesglose').innerHTML =
+        state.conceptos.map(c => `<tr><td>${c.concepto}</td><td class="num mono">${fmt(c.monto)}</td></tr>`).join('') +
+        state.cargos.map(c => `<tr><td class="cargo">${c.concepto}</td><td class="num mono cargo">+ ${fmt(c.monto)}</td></tr>`).join('');
+      $('#totalRecibo').textContent = fmt(round2(state.saldoTotal + totalCargos()));
+    }
+  }
+
+  // ruleta
+  if (state.fase === 'ruleta') {
+    dibujarRuleta();
+    $('#btnGirar').disabled = state.girando || !state.identidad.ok;
+    $('#btnVolver').disabled = state.girando;
+    const inp = $('#inpIdentidad');
+    if (inp.value !== state.identidad.texto) inp.value = state.identidad.texto;
+    inp.disabled = state.girando;
+    $('#txtIdentidad').textContent = state.identidad.ok ? 'Identidad confirmada' : (state.identidad.texto.length === 4 ? 'No coincide' : '');
+    $('#txtIdentidad').className = state.identidad.ok ? 'ok' : 'muted';
+  }
+
+  // jugando: montar/desmontar según state
+  if (state.fase === 'jugando') {
+    if (!juegoActivo || juegoActivo.id !== state.metodoActual) {
+      if (juegoActivo) juegoActivo.desmontar();
+      juegoActivo = MINIJUEGOS.find(j => j.id === state.metodoActual);
+      $('#nombreJuego').textContent = juegoActivo.nombre;
+      $('#montoAsignadoTxt').textContent = fmt(state.montoAsignado);
+      juegoActivo.montar($('#contenedorJuego'), state.montoAsignado);
+    }
+  } else if (juegoActivo) {
+    juegoActivo.desmontar();
+    juegoActivo = null;
+    $('#contenedorJuego').innerHTML = '';
+  }
+
+  // fin
+  if (state.fase === 'fin') {
+    $('#cuerpoHistorial').innerHTML = state.historialGiros.map((g, i) =>
+      `<tr><td class="mono">${i + 1}</td><td>${g.metodo}</td><td class="num mono">${fmt(g.asignado)}</td><td class="num mono${g.logrado > 0 ? '' : ' perdido'}">${fmt(g.logrado)}</td></tr>`
+    ).join('');
+    $('#totalFin').textContent = fmt(state.historialGiros.reduce((s, g) => s + g.logrado, 0));
+    const seg = Math.round(state.tiempoTotal / 1000);
+    $('#tiempoTotal').textContent = `${Math.floor(seg / 60)} min ${seg % 60} s`;
+    $('#intentosFallidos').textContent = state.historialGiros.filter(g => g.logrado === 0).length;
+    $('#cargosFin').textContent = fmt(totalCargos());
+    $('#propinas').innerHTML = [10, 15, 20].map(n =>
+      `<button class="btn${state.propina === n ? ' elegida' : ''}" data-p="${n}" ${state.propina ? 'disabled' : ''}>${n}% · ${fmt(round2(state.saldoTotal * n / 100))}</button>`
+    ).join('');
+    $('#propinaTexto').textContent = state.propina ? `Propina del ${state.propina}% registrada para su próximo recibo.` : 'Agregue una propina para el equipo que procesó su pago. Es necesario para continuar.';
+    $('#calificacion').hidden = !state.propina;
+    $('#estrellas').innerHTML = [1, 2, 3, 4, 5].map(n =>
+      `<button class="btn${state.calificacion === n ? ' elegida' : ''}" data-v="${n}" ${n < 5 ? 'disabled title="Opción no disponible en este momento"' : ''}>${n}</button>`
+    ).join('');
+    $('#califTexto').textContent = state.calificacion
+      ? 'Su calificación fue registrada. Ya puede descargar el comprobante.'
+      : 'Califique su experiencia. Es obligatorio para emitir el comprobante.';
+    $('#btnDescargar').disabled = !state.calificacion;
+    $('#btnCompartir').hidden = !(state.calificacion && navigator.share);
+    $('#encuesta').hidden = !state.calificacion;
+    const ta = $('#txtComentario');
+    if (ta.value !== state.comentario) ta.value = state.comentario;
+    ta.disabled = state.comentarioEnviado;
+    $('#cntComentario').textContent = `${state.comentario.length}/20`;
+    $('#btnEnviar').disabled = state.comentarioEnviado || !state.comentario.trim();
+    $('#txtEncuesta').textContent = state.comentarioEnviado ? 'Archivado.' : '';
+  }
+}
+
+/* --- recibo: capa raspable ---------------------------------- */
+function prepararRaspado() {
+  const canvas = $('#raspar'), W = 520, H = 150;
+  const ctx = prepararCanvas(canvas, W, H);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = '#9CA3AF';
+  ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  ctx.fillStyle = 'rgba(28,41,60,.35)';
+  ctx.font = `700 12px ${FUENTE}`;
+  ctx.translate(W / 2, H / 2); ctx.rotate(-0.22);
+  for (let y = -H; y <= H; y += 28) for (let x = -W; x <= W; x += 150) ctx.fillText('Raspe aquí', x, y);
+  ctx.restore();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.lineWidth = 26; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ui.raspar = { canvas, ctx, W, H, raspando: false, ult: null, tCalc: 0 };
+}
+function trazo(a, b) {
+  const { ctx } = ui.raspar;
+  ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x + 0.01, b.y + 0.01); ctx.stroke();
+}
+function calcularRaspado() {
+  const { ctx, canvas } = ui.raspar;
+  const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  let total = 0, vacios = 0;
+  for (let i = 3; i < d.length; i += 16) { total++; if (d[i] < 40) vacios++; }
+  aplicar({ tipo: 'RASPAR', porcentaje: vacios / total });
+}
+(function eventosRaspado() {
+  const c = $('#raspar');
+  c.addEventListener('pointerdown', e => {
+    const r = ui.raspar; if (!r || state.montoRevelado) return;
+    r.raspando = true; c.setPointerCapture(e.pointerId);
+    r.ult = coordsLogicas(c, e, r.W, r.H); trazo(r.ult, r.ult);
+  });
+  c.addEventListener('pointermove', e => {
+    const r = ui.raspar; if (!r || !r.raspando) return;
+    const p = coordsLogicas(c, e, r.W, r.H); trazo(r.ult, p); r.ult = p;
+    const t = performance.now();
+    if (t - r.tCalc > 150) { r.tCalc = t; calcularRaspado(); }
+  });
+  const fin = () => { const r = ui.raspar; if (!r || !r.raspando) return; r.raspando = false; calcularRaspado(); };
+  c.addEventListener('pointerup', fin);
+  c.addEventListener('pointercancel', fin);
+})();
+
+/* --- recibo: términos que crecen ----------------------------- */
+const FRASES_TERMINOS = [
+  'El usuario acepta que el método de pago será determinado por el sistema.',
+  'Los montos parciales asignados no son negociables ni transferibles.',
+  'La consulta del importe genera un cargo administrativo no reembolsable.',
+  'Los intentos no acreditados devengan una comisión por gestión.',
+  'El proveedor podrá actualizar estos términos mientras el usuario los lee.',
+  'La aceptación de los términos no implica conformidad por parte del proveedor.',
+  'Toda calificación distinta de cinco será considerada un error del usuario.',
+  'El tiempo invertido en el proceso no es computable a ningún efecto.'
+];
+function renderTerminos() {
+  const cant = TERMINOS_BASE + TERMINOS_EXTRA * Math.min(state.terminos.lecturas, 1);
+  const cont = $('#terminos');
+  if (cont.dataset.cant !== String(cant)) {
+    cont.dataset.cant = cant;
+    cont.innerHTML = `<p><b>Términos y condiciones (versión ${1 + Math.min(state.terminos.lecturas, 1)})</b></p>` +
+      Array.from({ length: cant }, (_, i) => `<p>${i + 1}. ${FRASES_TERMINOS[i % FRASES_TERMINOS.length]}</p>`).join('');
+  }
+  const chk = $('#chkTerminos');
+  chk.disabled = state.terminos.lecturas < 2;
+  chk.checked = state.terminos.aceptado;
+  $('#txtTerminos').textContent = state.terminos.lecturas >= 2 ? 'Leí los términos y condiciones' : `Leí los términos y condiciones hasta el final (${state.terminos.lecturas}/2)`;
+}
+$('#terminos').addEventListener('scroll', e => {
+  const el = e.target;
+  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2 && !el.dataset.abajo) { el.dataset.abajo = '1'; aplicar({ tipo: 'TERMINOS_FIN' }); }
+  if (el.scrollTop < 20) delete el.dataset.abajo;
+});
+$('#chkTerminos').addEventListener('change', e => aplicar({ tipo: 'TERMINOS_ACEPTAR', valor: e.target.checked }));
+
+/* --- sonido sintetizado (sin archivos) ---------------------- */
+const audio = { ctx: null, sector: -1, ultimoMensaje: '' };
+document.addEventListener('pointerdown', () => { if (!audio.ctx) { try { audio.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } }, { once: true });
+function tono(freq, dur, tipo = 'square', vol = 0.06) {
+  if (!audio.ctx || REDUCIR_MOVIMIENTO) return;
+  const o = audio.ctx.createOscillator(), g = audio.ctx.createGain();
+  o.type = tipo; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, audio.ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.0001, audio.ctx.currentTime + dur);
+  o.connect(g); g.connect(audio.ctx.destination);
+  o.start(); o.stop(audio.ctx.currentTime + dur);
+}
+function sonar() {
+  if (state.fase === 'ruleta' && state.girando) {
+    const sec = sectorEnPuntero();
+    if (sec !== audio.sector) { audio.sector = sec; tono(1400, 0.03); }
+  }
+  if (state.mensaje && state.mensaje !== audio.ultimoMensaje) {
+    audio.ultimoMensaje = state.mensaje;
+    if (state.mensajeTipo === 'error') { tono(110, 0.5, 'sawtooth', 0.08); setTimeout(() => tono(82, 0.6, 'sawtooth', 0.08), 180); }
+    else if (state.mensajeTipo === 'exito') { tono(660, 0.15, 'triangle'); setTimeout(() => tono(880, 0.25, 'triangle'), 160); }
+  }
+}
+
+/* --- ruleta ------------------------------------------------- */
+function dibujarRuleta() {
+  if (!ui.ruleta) { const canvas = $('#ruleta'), W = 340; ui.ruleta = { canvas, ctx: prepararCanvas(canvas, W, W), W }; }
+  const { ctx, W } = ui.ruleta;
+  const n = MINIJUEGOS.length, paso = 2 * Math.PI / n, cx = W / 2, cy = W / 2, R = W / 2 - 12;
+  const colores = [COLOR.primary, COLOR.surface, COLOR.secondary, COLOR.bg];
+  ctx.clearRect(0, 0, W, W);
+  for (let i = 0; i < n; i++) {
+    const a0 = state.ruleta.angulo + i * paso, a1 = a0 + paso;
+    const color = colores[i % colores.length];
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a0, a1); ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = COLOR.text; ctx.stroke();
+    ctx.save();
+    ctx.translate(cx, cy); ctx.rotate(a0 + paso / 2);
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = color === COLOR.secondary ? '#fff' : COLOR.text;
+    ctx.font = `700 11px ${FUENTE}`;
+    ctx.fillText(MINIJUEGOS[i].nombre, R - 12, 0, R - 40);
+    ctx.restore();
+  }
+  ctx.beginPath(); ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+  ctx.fillStyle = COLOR.surface; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = COLOR.text; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx - 15, 2); ctx.lineTo(cx + 15, 2); ctx.lineTo(cx, 32); ctx.closePath();
+  ctx.fillStyle = COLOR.danger; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = COLOR.text; ctx.stroke();
+}
+
+/* ============================================================
+   BUCLE GLOBAL (único requestAnimationFrame)
+   ============================================================ */
+let ultimoT = performance.now();
+function bucle(t) {
+  const dt = Math.min((t - ultimoT) / 1000, 0.1);
+  ultimoT = t;
+  if (state.fase === 'recibo') aplicar({ tipo: 'TICK_RECIBO', dt });
+  else if (state.fase === 'ruleta' && state.girando) aplicar({ tipo: 'TICK_RULETA', dt });
+  else if (state.fase === 'ruleta' && state.identidad.texto && !state.identidad.ok) aplicar({ tipo: 'TICK_IDENTIDAD', dt });
+  else if (state.fase === 'ruleta' && state.identidad.ok) aplicar({ tipo: 'TICK_RULETA_INACTIVA', dt });
+  else if (state.fase === 'jugando' && juegoActivo) juegoActivo.update(dt);
+  requestAnimationFrame(bucle);
+}
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+$('#btnContinuar').addEventListener('click', () => aplicar({ tipo: 'IR_A_RULETA' }));
+$('#btnGirar').addEventListener('click', () => aplicar({ tipo: 'GIRAR' }));
+$('#btnVolver').addEventListener('click', () => aplicar({ tipo: 'VOLVER_RECIBO' }));
+$('#btnMostrarCodigo').addEventListener('click', () => aplicar({ tipo: 'MOSTRAR_CODIGO' }));
+$('#propinas').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) aplicar({ tipo: 'PROPINA', valor: +b.dataset.p }); });
+$('#btnReiniciar').addEventListener('click', () => aplicar({ tipo: 'REINICIAR' }));
+$('#estrellas').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) aplicar({ tipo: 'CALIFICAR', valor: +b.dataset.v }); });
+$('#btnDescargar').addEventListener('click', descargarComprobante);
+$('#inpIdentidad').addEventListener('input', e => aplicar({ tipo: 'IDENTIDAD_ESCRIBIR', texto: e.target.value }));
+$('#txtComentario').addEventListener('input', e => aplicar({ tipo: 'COMENTAR', texto: e.target.value }));
+$('#btnEnviar').addEventListener('click', () => aplicar({ tipo: 'ENVIAR_COMENTARIO' }));
+$('#btnCompartir').addEventListener('click', () => {
+  if (navigator.share) navigator.share({ title: 'Comprobante PagoYa', text: textoComprobante().join('\n') }).catch(() => {});
+});
+
+// Comprobante en texto plano, generado del state. Solo lectura: no muta nada.
+function textoComprobante() {
+  return [
+    'PAGOYA - COMPROBANTE DE PAGO', `Recibo ${state.nroRecibo} - Luz y agua`, '',
+    ...state.conceptos.map(c => `${c.concepto.padEnd(28)}${fmt(c.monto).padStart(10)}`),
+    ...state.cargos.map(c => `${c.concepto.padEnd(28)}${('+ ' + fmt(c.monto)).padStart(10)}`),
+    `${'Total'.padEnd(28)}${fmt(round2(state.saldoTotal + totalCargos())).padStart(10)}`, '',
+    'Intentos:',
+    ...state.historialGiros.map((g, i) => `${String(i + 1).padStart(2)}. ${g.metodo.padEnd(22)} asignado ${fmt(g.asignado).padStart(8)}  acreditado ${fmt(g.logrado).padStart(8)}`),
+    '',
+    `Tiempo invertido: ${Math.round(state.tiempoTotal / 1000)} s`,
+    `Propina comprometida: ${state.propina}% (${fmt(state.propinaPendiente)}) - se cobra en el próximo recibo`,
+    `Calificación: ${state.calificacion}/5`,
+    state.comentarioEnviado ? `Comentario: ${state.comentario} (archivado)` : '',
+    '',
+    'Gracias por su colaboración con el proceso.'
+  ];
+}
+function descargarComprobante() {
+  const url = URL.createObjectURL(new Blob([textoComprobante().join('\n')], { type: 'text/plain;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = `comprobante-${state.nroRecibo}.txt`; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+render();
+requestAnimationFrame(bucle);
+</script>
+</body>
+</html>
