@@ -125,12 +125,9 @@ algo mas que sea de monto a pagar quiza los minijuegos si se ven bien, y algo ma
 
 ## 4 — Profundizar el recibo y la ruleta
 
-```
-[PEGAR ACÁ EL PROMPT — es el que produjo el pincel de raspado más fino, el código de
-identidad con vida útil, las cuatro mejoras de la ruleta y la propina obligatoria]
-```
+*El texto literal de este prompt no quedó guardado. Por lo que devolvió, pedía: un pincel de raspado más fino; un código de identidad con vida útil que se oculta y cobra por volver a verse; cuatro cambios en la ruleta (pausa antes de montar el juego, una calibración que la hace retroceder, arranque automático por inactividad y un sector que sube el saldo), y una propina obligatoria al cierre.*
 
-**Qué intentaba lograr:** [completar en una o dos líneas]
+**Qué intentaba lograr:** endurecer el recibo y la ruleta, que después del prompt 3 todavía se atravesaban rápido: raspar con un pincel ancho llevaba segundos, y la ruleta daba un resultado y lo respetaba. Quería que el usuario perdiera el control incluso donde no había nada que jugar.
 
 **Qué devolvió:** pincel de raspado de 44 a 26 px, y un código de identidad con vida útil de 8 segundos que después se oculta y cuesta 0.30 volver a ver. En la ruleta, cuatro cambios: pausa de 1.6 s anunciando el método antes de montar el juego; una "calibración" que el 30% de las veces hace retroceder la rueda y puede cambiar de sector; arranque automático a los 10 segundos de inactividad ("Iniciamos el giro por usted"); y un sector "Cambio de monto" que no se juega y sube el saldo un 10%. En el cierre, propina obligatoria de 10/15/20% sin opción de omitir, que se cobra recién en el recibo siguiente.
 
