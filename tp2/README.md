@@ -10,7 +10,7 @@ Pegar el contenido de [openapi.yaml](openapi.yaml) en [editor.swagger.io](https:
 
 Un dominio que conozco de trabajar en obra, no un ejemplo de manual. Una inspección es una visita fechada con un responsable, y las observaciones son los hallazgos que quedan registrados en esa visita: un desprendimiento en el eje 4, un encofrado mal apuntalado, una armadura sin recubrimiento. La relación es de pertenencia real —una observación fuera de una inspección no tiene fecha, ni inspector, ni contexto— así que la jerarquía en el path se justifica sola.
 
-Salió en cuatro prompts, en una sola conversación.
+Salió en cinco prompts, en una sola conversación.
 
 ## Decisiones que tomé yo
 
