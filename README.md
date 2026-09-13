@@ -7,7 +7,7 @@ Repositorio del curso Introducción a la Ingeniería de Software Asistida por In
 | Entrega | Carpeta | Estado | Título |
 | --- | --- | --- | --- |
 | TP 1 | [tp1/](tp1/) | Entregado | PagoYa: el recibo que se paga por sorteo |
-| TP 2 | — | Pendiente | — |
+| TP 2 | [tp2/](tp2/) | Entregado | API de inspecciones de obra |
 | Trabajo Práctico Final | — | Pendiente | — |
 
 Cada carpeta de entrega se agrega cuando llega la entrega. Las filas sin link todavía no tienen carpeta.
