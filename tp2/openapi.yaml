@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: API de Inspecciones de Obra
+  version: 1.0.0
+  description: >-
+    Gestión de inspecciones de obra y las observaciones registradas en cada una.
+    El identificador de la inspección viaja únicamente en el path.
+
+servers:
+  - url: https://api.example.com/v1
+
+tags:
+  - name: Inspecciones
+  - name: Observaciones
+
+paths:
+  /inspecciones:
+    get:
+      tags: [Inspecciones]
+      summary: Listar inspecciones
+      operationId: listarInspecciones
+      parameters:
+        - name: archivadas
+          in: query
+          required: false
+          description: Si es true, el listado incluye también las inspecciones archivadas. Por defecto devuelve solo las activas.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Lista de inspecciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Inspeccion'
+    post:
+      tags: [Inspecciones]
+      summary: Crear una inspección
+      operationId: crearInspeccion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspeccionInput'
+      responses:
+        '201':
+          description: Inspección creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inspeccion'
+        '400':
+          description: Falta obra, fecha o inspector, o el cuerpo es inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /inspecciones/{inspeccionId}:
+    parameters:
+      - $ref: '#/components/parameters/InspeccionId'
+    patch:
+      tags: [Inspecciones]
+      summary: Archivar o reactivar una inspección
+      operationId: actualizarInspeccion
+      description: >-
+        Cambia el estado de archivo de la inspección. Las inspecciones no se
+        eliminan, se archivan, para conservar la trazabilidad. Archivar no elimina
+        las observaciones: siguen siendo accesibles por su path.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InspeccionPatch'
+      responses:
+        '200':
+          description: Inspección actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inspeccion'
+        '400':
+          description: El cuerpo es inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/InspeccionNoEncontrada'
+
+  /inspecciones/{inspeccionId}/observaciones:
+    parameters:
+      - $ref: '#/components/parameters/InspeccionId'
+    get:
+      tags: [Observaciones]
+      summary: Listar observaciones de una inspección
+      operationId: listarObservaciones
+      responses:
+        '200':
+          description: Lista de observaciones de la inspección
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Observacion'
+        '404':
+          $ref: '#/components/responses/InspeccionNoEncontrada'
+    post:
+      tags: [Observaciones]
+      summary: Registrar una observación en una inspección
+      operationId: crearObservacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservacionInput'
+      responses:
+        '201':
+          description: Observación creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observacion'
+        '400':
+          description: Falta descripcion, o el cuerpo es inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/InspeccionNoEncontrada'
+
+  /inspecciones/{inspeccionId}/observaciones/{observacionId}:
+    parameters:
+      - $ref: '#/components/parameters/InspeccionId'
+      - $ref: '#/components/parameters/ObservacionId'
+    delete:
+      tags: [Observaciones]
+      summary: Eliminar una observación de una inspección
+      operationId: eliminarObservacion
+      responses:
+        '204':
+          description: Observación eliminada
+        '404':
+          description: La inspección o la observación no existen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  parameters:
+    InspeccionId:
+      name: inspeccionId
+      in: path
+      required: true
+      description: Identificador de la inspección
+      schema:
+        type: string
+    ObservacionId:
+      name: observacionId
+      in: path
+      required: true
+      description: Identificador de la observación
+      schema:
+        type: string
+
+  responses:
+    InspeccionNoEncontrada:
+      description: La inspección no existe
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    EstadoInspeccion:
+      type: string
+      enum: [programada, en_curso, cerrada]
+
+    Severidad:
+      type: string
+      enum: [leve, moderada, critica]
+
+    InspeccionInput:
+      type: object
+      description: Datos de entrada para crear una inspección. El id lo genera el servidor.
+      required: [obra, fecha, inspector]
+      properties:
+        obra:
+          type: string
+          description: Nombre o código de la obra
+        fecha:
+          type: string
+          format: date
+        inspector:
+          type: string
+        estado:
+          allOf:
+            - $ref: '#/components/schemas/EstadoInspeccion'
+          default: programada
+
+    Inspeccion:
+      type: object
+      description: Inspección tal como la devuelve el servidor
+      required: [id, obra, fecha, inspector, estado, archivada]
+      properties:
+        id:
+          type: string
+          readOnly: true
+        obra:
+          type: string
+        fecha:
+          type: string
+          format: date
+        inspector:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoInspeccion'
+        archivada:
+          type: boolean
+          readOnly: true
+          description: Toda inspección nace activa (false). Se modifica solo vía PATCH.
+
+    InspeccionPatch:
+      type: object
+      description: Datos de entrada para archivar o reactivar una inspección
+      required: [archivada]
+      properties:
+        archivada:
+          type: boolean
+
+    ObservacionInput:
+      type: object
+      description: >-
+        Datos de entrada para registrar una observación. El id lo genera el servidor
+        y la inspección a la que pertenece se toma del path, no del cuerpo.
+      required: [descripcion]
+      properties:
+        descripcion:
+          type: string
+        severidad:
+          allOf:
+            - $ref: '#/components/schemas/Severidad'
+          default: leve
+        ubicacion:
+          type: string
+          description: Ubicación en obra (sector, nivel, eje, etc.)
+        resuelta:
+          type: boolean
+          default: false
+
+    Observacion:
+      type: object
+      description: Observación tal como la devuelve el servidor
+      required: [id, descripcion, severidad, resuelta, inspeccion_id]
+      properties:
+        id:
+          type: string
+          readOnly: true
+        descripcion:
+          type: string
+        severidad:
+          $ref: '#/components/schemas/Severidad'
+        ubicacion:
+          type: string
+        resuelta:
+          type: boolean
+        inspeccion_id:
+          type: string
+          readOnly: true
+          description: Identificador de la inspección a la que pertenece
+
+    Error:
+      type: object
+      required: [codigo, mensaje]
+      properties:
+        codigo:
+          type: string
+          examples: [validacion, no_encontrado]
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          description: Campos con error, cuando aplica
+          items:
+            type: object
+            required: [campo, mensaje]
+            properties:
+              campo:
+                type: string
+              mensaje:
+                type: string
