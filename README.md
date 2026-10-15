@@ -8,7 +8,15 @@ Repositorio del curso Introducción a la Ingeniería de Software Asistida por In
 | --- | --- | --- | --- |
 | TP 1 | [tp1/](tp1/) | Entregado | PagoYa: el recibo que se paga por sorteo |
 | TP 2 | [tp2/](tp2/) | Entregado | API de inspecciones de obra |
-| Trabajo Práctico Final | [tp-final/](tp-final/) | Entregado | Madori: diseñador de interiores 2D y 3D (con Victoria Villalba) |
+| Trabajo Práctico Final | [tp-final/](tp-final/) | Entregado | [Madori](https://github.com/SilvertK164/interiores-3d): diseñador de interiores 2D y 3D, con [Victoria Villalba](https://github.com/vivillalbatevez) |
+
+## Trabajo Práctico Final
+
+**Madori**, un diseñador de interiores 2D y 3D hecho junto con [Victoria Villalba](https://github.com/vivillalbatevez).
+
+- Informe de la entrega: [tp-final/](tp-final/)
+- Repositorio del proyecto: https://github.com/SilvertK164/interiores-3d
+- Aplicación en línea: https://madori-web-opal.vercel.app
 
 Cada carpeta de entrega se agrega cuando llega la entrega. Las filas sin link todavía no tienen carpeta.
 
